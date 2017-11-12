@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"regexp"
 	"strconv"
 	"time"
 
@@ -75,6 +76,10 @@ type manifestResp struct {
 	Config   interface{} `json:"config,omitempty" `
 }
 
+const repoNameMaxLen int = 255
+const repoNameMinLen int = 4
+const restrictedRepoNameChars = `[a-z0-9]+(?:[/._-][a-z0-9]+)*`
+
 // Get ...
 func (ra *RepositoryAPI) Get() {
 	projectID, err := ra.GetInt64("project_id")
@@ -126,6 +131,74 @@ func (ra *RepositoryAPI) Get() {
 	ra.SetPaginationHeader(total, page, pageSize)
 	ra.Data["json"] = repositories
 	ra.ServeJSON()
+}
+
+// Post ...
+func (ra *RepositoryAPI) Post() {
+	if !ra.SecurityCtx.IsAuthenticated() {
+		ra.HandleUnauthorized()
+		return
+	}
+	var repo *models.RepoRequest
+	ra.DecodeJSONReq(&repo)
+	err := validateRepoReq(repo)
+	if err != nil {
+		log.Errorf("Invalid project request, error: %v", err)
+		ra.RenderError(http.StatusBadRequest, fmt.Sprintf("invalid request: %v", err))
+		return
+	}
+
+	repoName := repo.Name
+	projectName, _ := utils.ParseRepository(repoName)
+	project, err := ra.ProjectMgr.Get(projectName)
+	if err != nil {
+		ra.ParseAndHandleError(fmt.Sprintf("failed to get the project %s",
+			projectName), err)
+		return
+	}
+
+	if project == nil {
+		ra.HandleNotFound(fmt.Sprintf("project %s not found", projectName))
+		return
+	}
+
+	if !ra.SecurityCtx.HasAllPerm(projectName) {
+		ra.HandleForbidden(ra.SecurityCtx.GetUsername())
+		return
+	}
+
+	exist := dao.RepositoryExists(repo.Name)
+	if exist {
+		ra.RenderError(http.StatusConflict, "")
+		return
+	}
+
+	repoRecord := models.RepoRecord{
+		Name:      repo.Name,
+		ProjectID: project.ProjectID,
+	}
+	repoID, err := dao.AddRepository(repoRecord)
+	if err != nil {
+		log.Errorf("Error happens when adding repository: %v", err)
+		ra.ParseAndHandleError("failed to add respository", err)
+		return
+	}
+
+	go func() {
+		if err := dao.AddAccessLog(models.AccessLog{
+			Username:  ra.SecurityCtx.GetUsername(),
+			ProjectID: project.ProjectID,
+			RepoName:  repoName,
+			RepoTag:   "N/A",
+			Operation: "create",
+			OpTime:    time.Now(),
+		}); err != nil {
+			log.Errorf("failed to add access log: %v", err)
+		}
+	}()
+
+	ra.Redirect(http.StatusCreated, strconv.FormatInt(repoID, 10))
+
 }
 
 func getRepositories(projectID int64, keyword string,
@@ -211,7 +284,13 @@ func (ra *RepositoryAPI) Delete() {
 
 		// TODO remove the logic if the bug of registry is fixed
 		if len(tagList) == 0 {
-			ra.CustomAbort(http.StatusNotFound, http.StatusText(http.StatusNotFound))
+			//	ra.CustomAbort(http.StatusNotFound, http.StatusText(http.StatusNotFound))
+
+			// if repo is not exsit in registry, so we remove from the db
+			if err = dao.DeleteRepository(repoName); err != nil {
+				log.Errorf("failed to delete repository %s: %v", repoName, err)
+				ra.CustomAbort(http.StatusInternalServerError, "")
+			}
 		}
 
 		tags = append(tags, tagList...)
@@ -844,4 +923,18 @@ func getScanOverview(digest string, tag string) *models.ImgScanOverview {
 		data.DetailsKey = ""
 	}
 	return data
+}
+
+func validateRepoReq(req *models.RepoRequest) error {
+	rn := req.Name
+	if isIllegalLength(req.Name, repoNameMinLen, repoNameMaxLen) {
+		return fmt.Errorf("Repository name is illegal in length. (greater than 4 or less than 255)")
+	}
+	validRepoName := regexp.MustCompile(`^` + restrictedRepoNameChars + `$`)
+	legal := validRepoName.MatchString(rn)
+	if !legal {
+		return fmt.Errorf("repository name is not in lower case or contains illgeal characters")
+	}
+
+	return nil
 }

@@ -88,7 +88,7 @@ func initRouters() {
 	beego.Router("/api/projects/:id([0-9]+)/logs", &api.ProjectAPI{}, "get:Logs")
 	beego.Router("/api/projects/:id([0-9]+)/_deletable", &api.ProjectAPI{}, "get:Deletable")
 	beego.Router("/api/internal/syncregistry", &api.InternalAPI{}, "post:SyncRegistry")
-	beego.Router("/api/repositories", &api.RepositoryAPI{}, "get:Get")
+	beego.Router("/api/repositories", &api.RepositoryAPI{}, "get:Get;post:Post")
 	beego.Router("/api/repositories/scanAll", &api.RepositoryAPI{}, "post:ScanAll")
 	beego.Router("/api/repositories/*", &api.RepositoryAPI{}, "delete:Delete")
 	beego.Router("/api/repositories/*/tags/:tag", &api.RepositoryAPI{}, "delete:Delete;get:GetTag")

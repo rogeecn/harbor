@@ -23,17 +23,17 @@ import (
 )
 
 // AddRepository adds a repo to the database.
-func AddRepository(repo models.RepoRecord) error {
+func AddRepository(repo models.RepoRecord) (int64, error) {
 	if repo.ProjectID == 0 {
-		return fmt.Errorf("invalid project ID: %d", repo.ProjectID)
+		return 0, fmt.Errorf("invalid project ID: %d", repo.ProjectID)
 	}
 
 	o := GetOrmer()
 	now := time.Now()
 	repo.CreationTime = now
 	repo.UpdateTime = now
-	_, err := o.Insert(&repo)
-	return err
+	id, err := o.Insert(&repo)
+	return id, err
 }
 
 // GetRepositoryByName ...

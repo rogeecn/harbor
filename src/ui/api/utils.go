@@ -214,7 +214,7 @@ func SyncRegistry(pm projectmanager.ProjectManager) error {
 				PullCount: pullCount,
 			}
 
-			if err := dao.AddRepository(repoRecord); err != nil {
+			if _, err := dao.AddRepository(repoRecord); err != nil {
 				log.Errorf("Error happens when adding the missing repository: %v", err)
 			} else {
 				log.Debugf("Add repository: %s success.", repoToAdd)
@@ -222,15 +222,16 @@ func SyncRegistry(pm projectmanager.ProjectManager) error {
 		}
 	}
 
+    
 	if len(reposToDel) > 0 {
 		log.Debugf("Start deleting repositories from DB... ")
-		for _, repoToDel := range reposToDel {
-			if err := dao.DeleteRepository(repoToDel); err != nil {
-				log.Errorf("Error happens when deleting the repository: %v", err)
-			} else {
-				log.Debugf("Delete repository: %s success.", repoToDel)
-			}
-		}
+//		for _, repoToDel := range reposToDel {
+//			if err := dao.DeleteRepository(repoToDel); err != nil {
+//				log.Errorf("Error happens when deleting the repository: %v", err)
+//			} else {
+//				log.Debugf("Delete repository: %s success.", repoToDel)
+//			}
+//		}
 	}
 
 	log.Infof("Sync repositories from registry to DB is done.")

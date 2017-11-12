@@ -33,6 +33,11 @@ type RepoRecord struct {
 	UpdateTime   time.Time `orm:"column(update_time);auto_now" json:"update_time"`
 }
 
+// RepoRequest holds informations that need for creating reopsitroy API
+type RepoRequest struct {
+    Name        string   `json:"name"`
+}
+
 //TableName is required by by beego orm to map RepoRecord to table repository
 func (rp *RepoRecord) TableName() string {
 	return RepoTable

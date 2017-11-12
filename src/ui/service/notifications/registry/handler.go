@@ -100,7 +100,7 @@ func (n *NotificationHandler) Post() {
 					Name:      repository,
 					ProjectID: pro.ProjectID,
 				}
-				if err := dao.AddRepository(repoRecord); err != nil {
+				if _, err := dao.AddRepository(repoRecord); err != nil {
 					log.Errorf("Error happens when adding repository: %v", err)
 				}
 			}()
