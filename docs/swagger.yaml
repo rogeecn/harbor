@@ -795,6 +795,30 @@ paths:
           description: Project ID does not exist.
         '500':
           description: Unexpected internal errors.
+    post:
+      summary: Create a new repository.
+      description: |
+        This endpoint is for user to create a new repository.
+      parameters:
+        - name: repository
+          in: body
+          description: New created repository.
+          required: true
+          schema:
+            $ref: '#/definitions/RepositoryReq'
+      tags:
+        - Products
+      responses:
+        '201':
+          description: Repository created successfully.
+        '400':
+          description: Unsatisfied with constraints of the repository creation.
+        '401':
+          description: User need to log in first.
+        '409':
+          description: Repository name already exists.
+        '500':
+          description: Unexpected internal errors.
   '/repositories/{repo_name}':
     delete:
       summary: Delete a repository.
@@ -2650,6 +2674,12 @@ definitions:
       count:
         type: integer
         description: number of the components with certain severity.
+  RepositoryReq:
+    type: object
+    properties:
+      name:
+        type: string
+        description: The name of repository.
   Repository:
     type: object
     properties:
