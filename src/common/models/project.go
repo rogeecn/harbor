@@ -28,7 +28,7 @@ type Project struct {
 	CreationTimeStr string    `orm:"-" json:"creation_time_str"`
 	Deleted         int       `orm:"column(deleted)" json:"deleted"`
 	//UserID          int `json:"UserId"`
-	OwnerName string `orm:"-" json:"owner_name"`
+	OwnerName string `orm:"column(owner_name)" json:"owner_name"`
 	Public    int    `orm:"column(public)" json:"public"`
 	//This field does not have correspondent column in DB, this is just for UI to disable button
 	Togglable                                  bool      `orm:"-"`
