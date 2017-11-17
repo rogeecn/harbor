@@ -78,7 +78,7 @@ CHECKENVCMD=checkenv.sh
 BASEIMAGE=photon
 COMPILETAG=compile_normal
 REGISTRYSERVER=
-REGISTRYPROJECTNAME=vmware
+REGISTRYPROJECTNAME=latelan
 DEVFLAG=true
 NOTARYFLAG=false
 REGISTRYVERSION=2.6.2-photon
@@ -173,13 +173,13 @@ DOCKERFILENAME_POSTGRESQL=Dockerfile
 
 
 # docker image name
-DOCKERIMAGENAME_ADMINSERVER=vmware/harbor-adminserver
-DOCKERIMAGENAME_UI=vmware/harbor-ui
-DOCKERIMAGENAME_JOBSERVICE=vmware/harbor-jobservice
-DOCKERIMAGENAME_LOG=vmware/harbor-log
-DOCKERIMAGENAME_DB=vmware/harbor-db
-DOCKERIMAGENAME_CLATIRY=vmware/harbor-clarity-ui-builder
-DOCKERIMAGENAME_POSTGRESQL=vmware/postgresql
+DOCKERIMAGENAME_ADMINSERVER=latelan/harbor-adminserver
+DOCKERIMAGENAME_UI=latelan/harbor-ui
+DOCKERIMAGENAME_JOBSERVICE=latelan/harbor-jobservice
+DOCKERIMAGENAME_LOG=latelan/harbor-log
+DOCKERIMAGENAME_DB=latelan/harbor-db
+DOCKERIMAGENAME_CLATIRY=latelan/harbor-clarity-ui-builder
+DOCKERIMAGENAME_POSTGRESQL=latelan/postgresql
 # docker-compose files
 DOCKERCOMPOSEFILEPATH=$(MAKEPATH)
 DOCKERCOMPOSETPLFILENAME=docker-compose.tpl
