@@ -253,7 +253,7 @@ func GetProjects(query *models.ProjectQueryParam, base ...*models.BaseProjectCol
 	sql, params := projectQueryConditions(owner, name, public, member, role, base...)
 
 	sql = `select distinct p.project_id, p.name, p.public, p.owner_id, 
-				p.creation_time, p.update_time, u1.username as owner_name  ` + sql
+				p.creation_time, p.update_time ` + sql
 	if size > 0 {
 		sql += ` limit ?`
 		params = append(params, size)
@@ -297,7 +297,11 @@ func projectQueryConditions(owner, name string, public *bool, member string,
 	}
 
 	sql := ` from ` + collection + ` as p`
-    sql += ` join user u1 on p.owner_id = u1.user_id `
+
+	if len(owner) != 0 {
+		sql += ` join user u1
+					on p.owner_id = u1.user_id`
+	}
 
 	if len(member) != 0 {
 		sql += ` join project_member pm
